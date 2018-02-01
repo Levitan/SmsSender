@@ -3,16 +3,13 @@ package xyz.wildapp.example.smsrest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import xyz.wildapp.example.smsrest.api.SmsApiIntf;
 import xyz.wildapp.example.smsrest.model.SmsRequest;
 import xyz.wildapp.example.smsrest.model.SmsResponse;
+import xyz.wildapp.example.smsrest.repo.CallBackRepository;
 
 import java.io.IOException;
 
@@ -24,16 +21,19 @@ public class RESTController {
     @Autowired
     private SmsApiIntf api;
 
+    @Autowired
+    private CallBackRepository callback;
+
     @RequestMapping("/sendsms")
     public SmsResponse getData() throws IOException {
-        SmsRequest request = new SmsRequest();
-        request.setFrom("Wildapp Software");
-        request.setTo("79372573782");
-        request.setText("Hello from wildapp");
-        Call<SmsResponse> call = api.sendMessage(request);
-        Response<SmsResponse> resp = call.execute();
-        logger.info("Response code: {}", resp.code());
-        SmsResponse response = resp.body();
-        return response;
+        SmsRequest request = new SmsRequest("Wildapp Software",
+                "79372573782", "Hello from wildapp");
+
+        Response<SmsResponse> resp = api.sendMessage(request).execute();
+        if(resp.code() != 200){
+            logger.info("Response code: {}", resp.code());
+            return callback.createCallBack(resp);
+        }
+        return resp.body();
     }
 }

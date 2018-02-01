@@ -15,6 +15,17 @@ public class SmsRequest {
     @Expose
     private String text;
 
+    public SmsRequest(String from, String to) {
+        this.from = from;
+        this.to = to;
+    }
+
+    public SmsRequest(String from, String to, String text) {
+        this.from = from;
+        this.to = to;
+        this.text = text;
+    }
+
     public String getFrom() {
         return from;
     }
